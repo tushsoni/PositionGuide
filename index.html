@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Guide</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --border-muted: #e5e7eb;
+            --bg-label: #ffffff;
+            --danger-text: #ef4444; 
+            --row-height: 22px;
+            --label-width: 220px;
+            --primary-dark: #0f172a; 
+            --accent-blue: #3b82f6;
+            --sidebar-width: 60px;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 15px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+        .nav-icon { width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-nav-bar {
+            background: #0f172a;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sub-header-bar {
+            background: white;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .employee-schedule-container {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .emp-row { display: flex; border-bottom: 1px solid #f1f5f9; min-width: 1350px; }
+        .emp-label-cell { 
+            width: var(--label-width); 
+            padding: 10px; 
+            border-right: 1px solid #e5e7eb; 
+            background: #fff;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            font-weight: 600;
+        }
+        .time-slot { flex: 1; min-width: 45px; height: 45px; border-right: 1px solid #f1f5f9; position: relative; }
+        .shift-pill {
+            position: absolute;
+            height: 24px;
+            top: 10px;
+            border-radius: 12px;
+            background: #84cc16;
+            color: white;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            white-space: nowrap;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #ccc;
+            overflow-x: hidden;
+            display: inline-block;
+            min-width: 100%;
+            border-radius: 4px;
+        }
+
+        .main-table { display: table; border-collapse: collapse; width: 100%; }
+        .row { display: table-row; height: var(--row-height); }
+        .row:hover { background-color: #f8fafc; }
+
+        .cell {
+            display: table-cell;
+            border: 1px solid var(--border-muted);
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+.cell-label {
+    width: var(--label-width);
+    padding: 0 !important; /* Remove cell padding to allow inner flex to fill space */
+    background: var(--bg-label);
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    border-right: 2px solid #ddd;
+    white-space: nowrap;
+}
+
+.label-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+        .header-row { background: #f1f5f9; font-weight: bold; height: 25px; }
+        .txt-crit { color: var(--danger-text) !important; font-weight: bold; }
+        .txt-normal { color: #555 !important; }
+
+        .popover {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            border: 1px solid #e2e8f0;
+            padding: 0;
+            overflow: visible;
+        }
+
+        .pop-header-container {
+            padding: 10px;
+            background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+            border-bottom: 1px solid #e2e8f0;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pop-title { font-weight: 700; color: #1e293b; font-size: 13px; }
+
+        .pop-close-btn {
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            font-size: 14px;
+            z-index: 1001;
+        }
+
+        .pop-content-wrapper { padding: 12px; }
+
+        .pop-table { border-collapse: collapse; width: 100%; font-size: 10.5px; table-layout: fixed; }
+        .pop-table th { color: #94a3b8; font-weight: 400; padding: 8px 2px; border-bottom: 1px solid #f1f5f9; }
+        .pop-table td { padding: 8px 2px; border-bottom: 1px solid #f8fafc; text-align: center; }
+
+        .pop-job-label { text-align: left !important; color: #64748b !important; width: 85px; font-weight: 600; }
+
+        .chart-icon-btn { cursor: pointer; vertical-align: middle; margin-left: 100px; width: 16px; height: 16px; }
+
+        .budget-popover {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.15);
+            z-index: 2000;
+            display: none;
+            padding: 0;
+            min-width: 260px;
+        }
+        .budget-popover div {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            color: #4b5563;
+            font-size: 11.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .budget-popover div span:last-child {
+            font-weight: 600;
+            margin-left: 20px;
+        }
+        .budget-popover div:last-child { border-bottom: none; }
+
+        .graph-wrapper {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-top: 20px;
+            padding: 15px;
+            height: 300px;
+        }
+
+        /* KPI Row Colors from Screenshot 3 */
+        .kpi-bg { background-color: #fef3c7 !important; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="nav-icon"></div><div class="nav-icon"></div><div class="nav-icon"></div><div class="nav-icon"></div>
+</div>
+
+<div class="main-wrapper">
+    <div class="top-nav-bar">
+        <div><strong>My Apps</strong> &nbsp; | &nbsp; Dashboard &nbsp; | &nbsp; Schedule</div>
+        <div>07:17 AM &nbsp; 814 &nbsp; User</div>
+    </div>
+
+    <div class="sub-header-bar">
+        <div><button>&lt;</button> <strong>01/27/2026</strong> <button>&gt;</button> &nbsp; Day Week Month</div>
+        <div><button>Filters</button> <button style="background:var(--accent-blue); color:white; border:none; padding:5px 12px; border-radius:4px;">+ Add Employee</button></div>
+    </div>
+
+    <div class="view-content">
+        <div class="employee-schedule-container">
+            <div class="emp-row" id="timeHeaderRow">
+                <div class="emp-label-cell">Employees</div>
+            </div>
+            <div class="emp-row"><div class="emp-label-cell">Andrew K <br><span style="font-weight:normal; font-size:10px;">Hrs 0.0</span></div><div class="time-slot" style="flex:24"></div></div>
+            <div class="emp-row"><div class="emp-label-cell">Taasil T <br><span style="font-weight:normal; font-size:10px;">Hrs 9.0</span></div><div class="time-slot" style="flex:5"></div><div class="time-slot" style="flex:9"><div class="shift-pill" style="width:380px; background:#ef4444;">9:00A-6:30P STORE MANAGER</div></div><div class="time-slot" style="flex:10"></div></div>
+            <div class="emp-row"><div class="emp-label-cell">Aaron S <br><span style="font-weight:normal; font-size:10px;">Hrs 9.0</span></div><div class="time-slot" style="flex:20"></div><div class="time-slot" style="flex:9"><div class="shift-pill" style="width:380px; background:#8ca93e;">4:00P-10:30P ASSISTANT MANAGER</div></div><div class="time-slot" style="flex:10"></div></div>
+        </div>
+
+        <div class="table-container">
+            <div class="main-table" id="staffTable">
+                <div class="row header-row" id="headerRow">
+                    <div class="cell cell-label" style="display: flex; align-items: center; justify-content: flex-start; position: relative;">
+                        Hrs 47.50 | 18.24%
+                        <img id="budgetChartIcon" class="chart-icon-btn" src="https://agcdn.altametrics.com/agrelease/2025/202511180908/assets/images/zipSchedule/currency-chart-black.png" alt="chart">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="graph-wrapper">
+            <canvas id="laborChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="popoverUI" class="popover"></div>
+<div id="budgetPopover" class="budget-popover">
+    <div><span>Budget Hours :</span> <span>79.67 Hrs | 22.00%</span></div>
+    <div><span>Scheduled Hours :</span> <span>48.00 | 17.13%</span></div>
+    <div><span>Budget variance :</span> <span>31.67 | 4.87%</span></div>
+</div>
+
+<script>
+    const hours = ["4A","5A","6A","7A","8A","9A","10A","11A","12P","1P","2P","3P","4P","5P","6P","7P","8P","9P","10P","11P","12A","1A","2A","3A"];
+    
+    const timeHeaderRow = document.getElementById('timeHeaderRow');
+    hours.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'time-slot';
+        div.style.textAlign = 'center';
+        div.style.paddingTop = '15px';
+        div.innerText = h;
+        timeHeaderRow.appendChild(div);
+    });
+
+    const forecastData = ["0.00", "1.50", "3.00", "4.50", "6.00", "7.00", "8.50", "11.00", "14.50", "13.00", "10.00", "9.50", "10.00", "13.50", "14.00", "11.00", "8.50", "6.00", "4.50", "3.00", "2.00", "0.00", "0.00", "0.00"];
+    const varData = [0, 0, 1, 1, 0, -1, -2, -3, -4, -2, 1, 2, 1, -3, -4, -2, 0, 1, 1, 2, 1, 0, 0, 0];
+    const schData = [3, 3, 3, 3, 3, 3, 3, 3, 5, 6, 6, 5, 4, 3, 3, 4, 4, 4, 3, 3, 3, 2, 1, 0];
+
+    const metrics = [
+        { name: "Total Sch. Staff", total: "(142.50)", val: "6" },
+        { name: "Fixed Staff", total: "(24.00)", val: "1" },
+        { name: "Variable Staff", total: "(118.50)", val: "5" },
+        { name: "Forecasted Staff", total: "(72.00)", isForecast: true },
+        { name: "Staff Variance", total: "(-24.00)", isVar: true },
+        { name: "Mgmt. Coverage", total: "(30.50)", val: "1" },
+        { name: "SPLH (Sales/Labor Hrs)", total: "(120.18)", val: "112" },
+        { name: "TPLH (Transactions/Labor Hrs)", total: "(5.25)", val: "5" },
+        { name: "Sch Labour %", total: "(17.13%)", val: "17%" },
+        { name: "Forecasted Sales ($)", total: "(5768.55)", isKpi: true },
+        { name: "Actual Sales ($)", total: "(27.98)", isKpi: true },
+        { name: "Forecasted Transactions", total: "(252)", isKpi: true },
+        { name: "Actual Transactions", total: "(1)", isKpi: true }
+    ];
+
+    const table = document.getElementById('staffTable');
+    const headerRow = document.getElementById('headerRow');
+    const popover = document.getElementById('popoverUI');
+
+    hours.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.innerText = h;
+        headerRow.appendChild(div);
+    });
+
+    const quarterForecast = forecastData.map(v => {
+    const base = Math.round(parseFloat(v));
+    const q1 = Math.max(base - 1, 0);
+    const q2 = base + 2;
+    const q3 = Math.max(base - 1, 0);
+    const q4 = base;
+    return [q1, q2, q3, q4]; // integers
+});
+
+    metrics.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'row';
+row.innerHTML = `
+        <div class="cell cell-label">
+            <div class="label-content">
+                <span style="font-style: italic;">${m.name}</span>
+                <span style="font-weight: normal;">${m.total}</span>
+            </div>
+        </div>`;
+
+        hours.forEach((h, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+
+            if (m.isForecast) {
+                cell.innerText = forecastData[i];
+                cell.style.cursor = "pointer";
+                cell.onclick = (e) => showForecastPop(e, h, i);
+            } else if (m.isVar) {
+                const v = varData[i];
+                cell.innerText = v;
+                cell.style.cursor = "pointer";
+                if (v < 0) cell.classList.add('txt-crit');
+                else cell.classList.add('txt-normal');
+                cell.onclick = (e) => showVarPop(e, h);
+            } else if (m.isKpi) {
+                cell.classList.add('kpi-bg');
+                cell.innerText = (m.name.includes("Sales")) ? "0" : "0";
+            } else {
+                cell.innerText = m.val;
+            }
+            row.appendChild(cell);
+        });
+        table.appendChild(row);
+    });
+
+function showForecastPop(e, hour, idx) {
+    const timeBase = hour.toLowerCase();
+    const quarters = [":15", ":30", ":45", ":00"];
+    const qTotals = quarterForecast[idx]; // already integer
+
+    function splitByRole(total) {
+        const manager = Math.round(total * 0.15);
+        const shiftMgr = Math.round(total * 0.15);
+        const cashier = Math.round(total * 0.30);
+        const crew = total - (manager + shiftMgr + cashier);
+        return { manager, shiftMgr, cashier, crew, total };
+    }
+
+    const split = qTotals.map(v => splitByRole(v));
+
+    popover.style.width = "420px"; 
+    popover.innerHTML = `
+        <div class="pop-header-container">
+            <div class="pop-title">Forecasted Staff Details</div>
+            <div class="pop-close-btn" onclick="hidePop()">×</div>
+        </div>
+        <div class="pop-content-wrapper">
+            <table class="pop-table">
+                <thead>
+                    <tr>
+                        <th style="width:95px">JOB</th>
+                        ${quarters.map(q => `<th>${timeBase.replace(/[a-z]/g, '')}${q}${timeBase.match(/[a-z]/g).join('')}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="pop-job-label">Store Manager</td>${split.map(s => `<td>${s.manager}</td>`).join('')}</tr>
+                    <tr><td class="pop-job-label">Shift Manager</td>${split.map(s => `<td>${s.shiftMgr}</td>`).join('')}</tr>
+                    <tr><td class="pop-job-label">Cashier</td>${split.map(s => `<td>${s.cashier}</td>`).join('')}</tr>
+                    <tr><td class="pop-job-label">Crew</td>${split.map(s => `<td>${s.crew}</td>`).join('')}</tr>
+                    <tr style="border-top:1px solid #e2e8f0; font-weight:700;">
+                        <td class="pop-job-label">Total</td>
+                        ${split.map(s => `<td>${s.total}</td>`).join('')}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    positionPop(e, 200);
+}
+
+    function showVarPop(e, hour) {
+    const jobs = ["Manager", "Shift Manager", "Cashier", "Crew"];
+    const clickedIdx = hours.indexOf(hour);
+    const displayRange = hours.slice(clickedIdx, clickedIdx + 4);
+
+    popover.style.width = "520px";
+
+    let html = `
+        <div class="pop-header-container">
+            <div class="pop-title">Staff Variance Details</div>
+            <div class="pop-close-btn" onclick="hidePop()">×</div>
+        </div>
+        <div class="pop-content-wrapper">
+            <table class="pop-table">
+                <thead>
+                    <tr>
+                        <th class="pop-job-label">JOB</th>
+                        ${displayRange.map(h => `<th colspan="4" style="text-align:center;">${h}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // NET VAR row (already coming from main table)
+    html += `
+        <tr style="background:#f8fafc; font-weight:700;">
+            <td class="pop-job-label">NET VAR</td>
+            ${displayRange.map((h, i) => {
+                const base = varData[clickedIdx + i] || 0;
+                const qs = [base, base, base, base]; // per quarter same net
+                return qs.map(v => `<td class="${v < 0 ? 'txt-crit' : 'txt-normal'}">${v}</td>`).join('');
+            }).join('')}
+        </tr>
+    `;
+
+    // Job-wise breakup (must sum = NET VAR per quarter)
+    jobs.forEach(job => {
+        html += `<tr><td class="pop-job-label">${job}</td>`;
+
+        displayRange.forEach((h, i) => {
+            const net = varData[clickedIdx + i] || 0;
+
+            // Logical split
+            let split;
+            switch (job) {
+                case "Manager": split = Math.round(net * 0.2); break;
+                case "Shift Manager": split = Math.round(net * 0.3); break;
+                case "Cashier": split = Math.round(net * 0.3); break;
+                case "Crew": split = net - (Math.round(net * 0.2) + Math.round(net * 0.3) + Math.round(net * 0.3)); break;
+            }
+
+            // 4 quarters for each hour block
+            for (let q = 0; q < 4; q++) {
+                html += `<td class="${split < 0 ? 'txt-crit' : 'txt-normal'}">${split}</td>`;
+            }
+        });
+
+        html += `</tr>`;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    popover.innerHTML = html;
+    positionPop(e, 260);
+}
+
+
+    function positionPop(e, offset) {
+        popover.style.display = 'block';
+        popover.style.left = Math.max(10, Math.min(e.pageX - offset, window.innerWidth - popover.offsetWidth - 20)) + 'px';
+        popover.style.top = (e.pageY + 10) + 'px';
+        e.stopPropagation();
+    }
+
+    function hidePop() { popover.style.display = 'none'; }
+    document.addEventListener('click', (e) => { 
+        if(!popover.contains(e.target)) hidePop();
+        if(!document.getElementById('budgetPopover').contains(e.target) && e.target.id !== 'budgetChartIcon') {
+            document.getElementById('budgetPopover').style.display = 'none';
+        }
+    });
+
+    function syncForecastRowFromQuarters() {
+    const allRows = document.querySelectorAll('.row');
+    let forecastRow = null;
+
+    allRows.forEach(r => {
+        const label = r.querySelector('.cell-label span');
+        if (label && label.innerText.trim() === 'Forecasted Staff') {
+            forecastRow = r;
+        }
+    });
+
+    if (!forecastRow) return;
+
+    quarterForecast.forEach((qArr, idx) => {
+        const avg = ((qArr[0] + qArr[1] + qArr[2] + qArr[3]) / 4).toFixed(2);
+        forecastData[idx] = avg;
+        forecastRow.children[idx + 1].innerText = avg;
+    });
+}
+
+// Call once after table is built
+syncForecastRowFromQuarters();
+
+    document.getElementById('budgetChartIcon').onclick = (e) => {
+        const pop = document.getElementById('budgetPopover');
+        pop.style.display = 'block';
+        
+        // Dynamic positioning ABOVE the icon
+        const rect = e.target.getBoundingClientRect();
+        pop.style.left = (rect.right - 260) + 'px'; // Aligning to the right end
+        pop.style.top = (window.scrollY + rect.top - pop.offsetHeight - 10) + 'px'; 
+        e.stopPropagation();
+    };
+
+    const ctx = document.getElementById('laborChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: hours,
+            datasets: [
+                {
+                    label: 'Forecasted Hours',
+                    data: forecastData.map(v => parseFloat(v) + 3),
+                    backgroundColor: '#bae6fd',
+                    categoryPercentage: 0.8,
+                    barPercentage: 0.9
+                },
+                {
+                    label: 'Scheduled hours',
+                    data: schData,
+                    backgroundColor: '#c4b5fd',
+                    categoryPercentage: 0.5,
+                    barPercentage: 0.6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Hours' } },
+                x: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+</body>
+</html>
