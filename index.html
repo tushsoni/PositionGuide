@@ -566,13 +566,9 @@ function showSchPop(e, hour, idx) {
 function showForecastPop(e, hour, idx) {
     const foreTotal = Math.round(parseFloat(forecastData[idx])) || 0;
     const positions = getPositionData(0, foreTotal);
-    
-    // Get the header object and destructure it
     const headerData = getCommonHeader(hour, "Forecasted Staff Details");
     
     popover.style.width = "500px";
-    
-    // Fix: Access .html property to avoid [object Object]
     let html = headerData.html; 
     
     html += `
@@ -581,11 +577,7 @@ function showForecastPop(e, hour, idx) {
                 <thead>
                     <tr>
                         <th style="width:110px; text-align: left; padding-left: 10px;">Position</th>
-                        <th colspan="4" style="text-align: center;">Forecasted</th>
-                    </tr>
-                    <tr style="font-size: 9px; color: #94a3b8;">
-                        <th style="border-bottom: none;"></th>
-                        ${headerData.intervals.map(time => `<th style="border-bottom: 1px solid #f1f5f9;">${time}</th>`).join('')}
+                        ${headerData.intervals.map(time => `<th style="text-align: center;">${time}</th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>`;
